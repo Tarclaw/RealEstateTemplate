@@ -1,14 +1,25 @@
 package com.realestate.web.example.domain;
 
+import javax.persistence.*;
+import java.io.Serializable;
 import java.math.BigInteger;
+import java.util.Objects;
 
-public class RealEstateAgent {
+@Entity
+@Table(name = "real_estate_agents")
+public class RealEstateAgent implements Serializable {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name="id", updatable = false, nullable = false)
+    private Long id;
     private String firstName;
     private String lastName;
     private String email;
     private String phoneNumber;
     private BigInteger salary;
+
+    @Embedded
     private Address address;
 
     public RealEstateAgent() {
@@ -23,6 +34,14 @@ public class RealEstateAgent {
         this.phoneNumber = phoneNumber;
         this.salary = salary;
         this.address = address;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getFirstName() {
@@ -83,5 +102,23 @@ public class RealEstateAgent {
                 ", salary=" + salary +
                 ", address=" + address +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RealEstateAgent that = (RealEstateAgent) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(firstName, that.firstName) &&
+                Objects.equals(lastName, that.lastName) &&
+                Objects.equals(email, that.email) &&
+                Objects.equals(phoneNumber, that.phoneNumber) &&
+                Objects.equals(salary, that.salary);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName, email, phoneNumber, salary);
     }
 }

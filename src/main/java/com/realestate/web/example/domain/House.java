@@ -1,7 +1,11 @@
 package com.realestate.web.example.domain;
 
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.util.List;
 
+@Entity
+@Table(name = "houses")
 public class House extends Facility {
 
     private Integer numberOfStoreys;

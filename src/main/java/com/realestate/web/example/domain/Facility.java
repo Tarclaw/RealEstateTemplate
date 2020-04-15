@@ -1,16 +1,29 @@
 package com.realestate.web.example.domain;
 
-import com.realestate.web.example.domain.interfaces.IFacility;
-
+import javax.persistence.*;
+import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
-public class Facility implements IFacility {
+@Entity
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+public class Facility implements Serializable {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name="id", updatable = false, nullable = false)
+    private Long id;
     private Integer numberOfRooms;
     private Integer totalArea;
     private String description;
+
+    @Lob
     private List<Byte[]> photos;
+
+    @Lob
     private List<Byte[]> videos;
+
+    @Embedded
     private Address address;
 
     public Facility() {
@@ -24,6 +37,14 @@ public class Facility implements IFacility {
         this.photos = photos;
         this.videos = videos;
         this.address = address;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Integer getNumberOfRooms() {
@@ -82,5 +103,24 @@ public class Facility implements IFacility {
                 ", description='" + description + '\'' +
                 ", address=" + address +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Facility facility = (Facility) o;
+        return Objects.equals(id, facility.id) &&
+                Objects.equals(numberOfRooms, facility.numberOfRooms) &&
+                Objects.equals(totalArea, facility.totalArea) &&
+                Objects.equals(description, facility.description) &&
+                Objects.equals(photos, facility.photos) &&
+                Objects.equals(videos, facility.videos) &&
+                Objects.equals(address, facility.address);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, numberOfRooms, totalArea, description, photos, videos, address);
     }
 }

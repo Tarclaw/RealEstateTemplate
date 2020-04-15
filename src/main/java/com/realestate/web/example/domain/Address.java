@@ -1,5 +1,8 @@
 package com.realestate.web.example.domain;
 
+import javax.persistence.Embeddable;
+
+@Embeddable
 public class Address {
 
     private Integer postcode;
