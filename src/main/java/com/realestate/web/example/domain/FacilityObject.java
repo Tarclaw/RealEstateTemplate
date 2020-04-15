@@ -1,32 +1,55 @@
 package com.realestate.web.example.domain;
 
 import com.realestate.web.example.domain.enums.Status;
-import com.realestate.web.example.domain.interfaces.IFacility;
 
+import javax.persistence.*;
+import java.io.Serializable;
 import java.math.BigInteger;
-import java.util.List;
+import java.util.Set;
+import java.util.Objects;
 
-public class FacilityObject {
+@Entity
+@Table(name = "facility_objects")
+public class FacilityObject implements Serializable {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name="id", updatable = false, nullable = false)
+    private Long id;
+
+    @Enumerated(EnumType.STRING)
     private Status status;
     private BigInteger monthRent;
     private BigInteger price;
     private BigInteger commissionAmount;
+
+    @ManyToOne
+    @JoinColumn(name="fk_agent")
     private RealEstateAgent agent;
-    private List<IFacility> facilities;
+
+    @OneToMany(mappedBy = "facilityObject")
+    private Set<Facility> facilities;
 
     public FacilityObject() {
     }
 
     public FacilityObject(Status status, BigInteger monthRent,
                           BigInteger price, BigInteger commissionAmount,
-                          RealEstateAgent agent, List<IFacility> facilities) {
+                          RealEstateAgent agent, Set<Facility> facilities) {
         this.status = status;
         this.monthRent = monthRent;
         this.price = price;
         this.commissionAmount = commissionAmount;
         this.agent = agent;
         this.facilities = facilities;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Status getStatus() {
@@ -69,11 +92,11 @@ public class FacilityObject {
         this.agent = agent;
     }
 
-    public List<IFacility> getFacilities() {
+    public Set<Facility> getFacilities() {
         return facilities;
     }
 
-    public void setFacilities(List<IFacility> facilities) {
+    public void setFacilities(Set<Facility> facilities) {
         this.facilities = facilities;
     }
 
@@ -87,5 +110,24 @@ public class FacilityObject {
                 ", agent=" + agent +
                 ", facilities=" + facilities +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FacilityObject that = (FacilityObject) o;
+        return Objects.equals(id, that.id) &&
+                status == that.status &&
+                Objects.equals(monthRent, that.monthRent) &&
+                Objects.equals(price, that.price) &&
+                Objects.equals(commissionAmount, that.commissionAmount) &&
+                Objects.equals(agent, that.agent) &&
+                Objects.equals(facilities, that.facilities);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, status, monthRent, price, commissionAmount, agent, facilities);
     }
 }
