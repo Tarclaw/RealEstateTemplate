@@ -11,7 +11,7 @@ public class RealEstateAgent implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="id", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private Long id;
     private String firstName;
     private String lastName;

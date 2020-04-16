@@ -6,12 +6,13 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
+@Table(name = "facilities")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Facility implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="id", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private Long id;
     private Integer numberOfRooms;
     private Integer totalArea;
