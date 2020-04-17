@@ -1,79 +1,41 @@
 package com.realestate.web.example.domain;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.math.BigInteger;
-import java.util.Objects;
+import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @Table(name = "real_estate_agents")
-public class RealEstateAgent implements Serializable {
+public class RealEstateAgent extends Person {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(updatable = false, nullable = false)
-    private Long id;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String phoneNumber;
     private BigInteger salary;
+    private LocalDate hiredDate;
+    private LocalDate quitDate;
 
-    @Embedded
-    private Address address;
+    @OneToMany(mappedBy = "agent")
+    private Set<FacilityObject> facilityObjects;
 
-    public RealEstateAgent() {
-    }
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "clients_agents",
+               joinColumns = @JoinColumn(name = "real_estate_agent_id"),
+               inverseJoinColumns = @JoinColumn(name = "client_id"))
+    private Set<Client> clients;
 
-    public RealEstateAgent(String firstName, String lastName,
-                           String email, String phoneNumber,
-                           BigInteger salary, Address address) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
+    public RealEstateAgent() {}
+
+    public RealEstateAgent(String firstName, String lastName, String login, String password,
+                           Contact contact, BigInteger salary, LocalDate hiredDate) {
+        super(firstName, lastName, login, password, contact);
         this.salary = salary;
-        this.address = address;
+        this.hiredDate = hiredDate;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public RealEstateAgent(String firstName, String lastName, String login, String password,
+                           Contact contact, Address address, BigInteger salary, LocalDate hiredDate) {
+        super(firstName, lastName, login, password, contact, address);
+        this.salary = salary;
+        this.hiredDate = hiredDate;
     }
 
     public BigInteger getSalary() {
@@ -84,41 +46,59 @@ public class RealEstateAgent implements Serializable {
         this.salary = salary;
     }
 
-    public Address getAddress() {
-        return address;
+    public LocalDate getHiredDate() {
+        return hiredDate;
     }
 
-    public void setAddress(Address address) {
-        this.address = address;
+    public void setHiredDate(LocalDate hiredDate) {
+        this.hiredDate = hiredDate;
+    }
+
+    public LocalDate getQuitDate() {
+        return quitDate;
+    }
+
+    public void setQuitDate(LocalDate quitDate) {
+        this.quitDate = quitDate;
+    }
+
+    public Set<FacilityObject> getFacilityObjects() {
+        return facilityObjects;
+    }
+
+    public void setFacilityObjects(Set<FacilityObject> facilityObjects) {
+        this.facilityObjects = facilityObjects;
+    }
+
+    public void addFacilityObject(FacilityObject facilityObject) {
+        this.facilityObjects.add(facilityObject);
+        facilityObject.setAgent(this);
+    }
+
+    public Set<Client> getClients() {
+        return clients;
+    }
+
+    public void setClients(Set<Client> clients) {
+        this.clients = clients;
+    }
+
+    public void addClient(Client client) {
+        this.clients.add(client);
+        client.getRealEstateAgents().add(this);
+    }
+
+    public void removeClient(Client client) {
+        this.clients.remove(client);
+        client.getRealEstateAgents().remove(this);
     }
 
     @Override
     public String toString() {
         return "RealEstateAgent{" +
-                "firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", salary=" + salary +
-                ", address=" + address +
+                "salary=" + salary +
+                ", hiredDate=" + hiredDate +
+                ", quitDate=" + quitDate +
                 '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        RealEstateAgent that = (RealEstateAgent) o;
-        return Objects.equals(id, that.id) &&
-                Objects.equals(firstName, that.firstName) &&
-                Objects.equals(lastName, that.lastName) &&
-                Objects.equals(email, that.email) &&
-                Objects.equals(phoneNumber, that.phoneNumber) &&
-                Objects.equals(salary, that.salary);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, firstName, lastName, email, phoneNumber, salary);
     }
 }

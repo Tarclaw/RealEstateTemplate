@@ -1,15 +1,28 @@
 package com.realestate.web.example.domain;
 
-import javax.persistence.Embeddable;
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Objects;
 
-@Embeddable
-public class Address {
+@Entity
+@Table(name = "addresses")
+public class Address implements Serializable {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(updatable = false, nullable = false)
+    private Long id;
     private Integer postcode;
     private Integer facilityNumber;
     private String city;
     private String district;
     private String street;
+
+    @OneToOne(mappedBy = "address")
+    private Facility facility;
+
+    @OneToOne(mappedBy = "address")
+    private Person person;
 
     public Address() {
     }
@@ -21,6 +34,14 @@ public class Address {
         this.city = city;
         this.district = district;
         this.street = street;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Integer getPostcode() {
@@ -63,14 +84,49 @@ public class Address {
         this.street = street;
     }
 
+    public Facility getFacility() {
+        return facility;
+    }
+
+    public void setFacility(Facility facility) {
+        this.facility = facility;
+    }
+
+    public Person getPerson() {
+        return person;
+    }
+
+    public void setPerson(Person person) {
+        this.person = person;
+    }
+
     @Override
     public String toString() {
         return "Address{" +
-                "postcode=" + postcode +
+                "id=" + id +
+                ", postcode=" + postcode +
                 ", facilityNumber=" + facilityNumber +
                 ", city='" + city + '\'' +
                 ", district='" + district + '\'' +
                 ", street='" + street + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Address address = (Address) o;
+        return Objects.equals(id, address.id) &&
+                Objects.equals(postcode, address.postcode) &&
+                Objects.equals(facilityNumber, address.facilityNumber) &&
+                Objects.equals(city, address.city) &&
+                Objects.equals(district, address.district) &&
+                Objects.equals(street, address.street);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, postcode, facilityNumber, city, district, street);
     }
 }

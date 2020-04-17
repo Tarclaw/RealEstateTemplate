@@ -24,24 +24,28 @@ public class FacilityObject implements Serializable {
     private BigInteger commissionAmount;
 
     @ManyToOne
-    @JoinColumn(name="fk_agent")
+    @JoinColumn(name="fk_agent") // optional, allow to define fk name
     private RealEstateAgent agent;
 
     @OneToMany(mappedBy = "facilityObject")
     private Set<Facility> facilities;
 
-    public FacilityObject() {
+    public FacilityObject() {}
+
+    public FacilityObject(Status status, BigInteger monthRent, BigInteger price, BigInteger commissionAmount) {
+        this.status = status;
+        this.monthRent = monthRent;
+        this.price = price;
+        this.commissionAmount = commissionAmount;
     }
 
-    public FacilityObject(Status status, BigInteger monthRent,
-                          BigInteger price, BigInteger commissionAmount,
-                          RealEstateAgent agent, Set<Facility> facilities) {
+    public FacilityObject(Status status, BigInteger monthRent, BigInteger price,
+                          BigInteger commissionAmount, RealEstateAgent agent) {
         this.status = status;
         this.monthRent = monthRent;
         this.price = price;
         this.commissionAmount = commissionAmount;
         this.agent = agent;
-        this.facilities = facilities;
     }
 
     public Long getId() {
@@ -98,6 +102,11 @@ public class FacilityObject implements Serializable {
 
     public void setFacilities(Set<Facility> facilities) {
         this.facilities = facilities;
+    }
+
+    public void addFacility(Facility facility) {
+        this.facilities.add(facility);
+        facility.setFacilityObject(this);
     }
 
     @Override

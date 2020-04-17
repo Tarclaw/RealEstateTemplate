@@ -2,8 +2,11 @@ package com.realestate.web.example.domain;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "facilities")
@@ -17,9 +20,8 @@ public class Facility implements Serializable {
     private Integer numberOfRooms;
     private Integer totalArea;
     private String description;
-
-    @ManyToOne
-    private FacilityObject facilityObject;
+    private LocalDateTime publishedDateTime;
+    private LocalDateTime closedDateTime;
 
     @Lob
     private List<Byte[]> photos;
@@ -27,20 +29,67 @@ public class Facility implements Serializable {
     @Lob
     private List<Byte[]> videos;
 
-    @Embedded
+    @OneToOne
+    @JoinColumn(name = "fk_address")
     private Address address;
 
-    public Facility() {
-    }
+    @ManyToOne
+    @JoinColumn(name = "fk_facility_object")
+    private FacilityObject facilityObject;
 
-    public Facility(Integer numberOfRooms, Integer totalArea, String description,
-                               List<Byte[]> photos, List<Byte[]> videos, Address address) {
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "clients_facilities",
+               joinColumns = @JoinColumn(name = "facility_id"),
+               inverseJoinColumns = @JoinColumn(name = "client_id"))
+    private Set<Client> clients;
+
+    public Facility() {}
+
+    public Facility(Integer numberOfRooms, Integer totalArea, String description, LocalDateTime publishedDateTime) {
         this.numberOfRooms = numberOfRooms;
         this.totalArea = totalArea;
         this.description = description;
+        this.publishedDateTime = publishedDateTime;
+    }
+
+    public Facility(Integer numberOfRooms, Integer totalArea, String description,
+                    LocalDateTime publishedDateTime, Address address) {
+        this.numberOfRooms = numberOfRooms;
+        this.totalArea = totalArea;
+        this.description = description;
+        this.publishedDateTime = publishedDateTime;
+        this.address = address;
+    }
+
+    public Facility(Integer numberOfRooms, Integer totalArea, String description,
+                    LocalDateTime publishedDateTime, FacilityObject facilityObject) {
+        this.numberOfRooms = numberOfRooms;
+        this.totalArea = totalArea;
+        this.description = description;
+        this.publishedDateTime = publishedDateTime;
+        this.facilityObject = facilityObject;
+    }
+
+    public Facility(Integer numberOfRooms, Integer totalArea, String description,
+                    LocalDateTime publishedDateTime, Address address, FacilityObject facilityObject) {
+        this.numberOfRooms = numberOfRooms;
+        this.totalArea = totalArea;
+        this.description = description;
+        this.publishedDateTime = publishedDateTime;
+        this.address = address;
+        this.facilityObject = facilityObject;
+    }
+
+    public Facility(Integer numberOfRooms, Integer totalArea, String description, LocalDateTime publishedDateTime,
+                    List<Byte[]> photos, List<Byte[]> videos, Address address, FacilityObject facilityObject) {
+        this.numberOfRooms = numberOfRooms;
+        this.totalArea = totalArea;
+        this.description = description;
+        this.publishedDateTime = publishedDateTime;
         this.photos = photos;
         this.videos = videos;
         this.address = address;
+        this.facilityObject = facilityObject;
     }
 
     public Long getId() {
@@ -75,6 +124,22 @@ public class Facility implements Serializable {
         this.description = description;
     }
 
+    public LocalDateTime getPublishedDateTime() {
+        return publishedDateTime;
+    }
+
+    public void setPublishedDateTime(LocalDateTime publishedDateTime) {
+        this.publishedDateTime = publishedDateTime;
+    }
+
+    public LocalDateTime getClosedDateTime() {
+        return closedDateTime;
+    }
+
+    public void setClosedDateTime(LocalDateTime closedDateTime) {
+        this.closedDateTime = closedDateTime;
+    }
+
     public List<Byte[]> getPhotos() {
         return photos;
     }
@@ -107,13 +172,32 @@ public class Facility implements Serializable {
         this.facilityObject = facilityObject;
     }
 
+    public Set<Client> getClients() {
+        return clients;
+    }
+
+    public void setClients(Set<Client> clients) {
+        this.clients = clients;
+    }
+
+    public void addClient(Client client) {
+        this.clients.add(client);
+        client.getFacilities().add(this);
+    }
+
+    public void removeClient(Client client) {
+        this.clients.remove(client);
+        client.getFacilities().remove(this);
+    }
+
     @Override
     public String toString() {
-        return "FacilityCredentials{" +
-                "numberOfRooms=" + numberOfRooms +
+        return "Facility{" +
+                "id=" + id +
+                ", numberOfRooms=" + numberOfRooms +
                 ", totalArea=" + totalArea +
                 ", description='" + description + '\'' +
-                ", address=" + address +
+                ", publishedDateTime=" + publishedDateTime +
                 '}';
     }
 
@@ -126,13 +210,11 @@ public class Facility implements Serializable {
                 Objects.equals(numberOfRooms, facility.numberOfRooms) &&
                 Objects.equals(totalArea, facility.totalArea) &&
                 Objects.equals(description, facility.description) &&
-                Objects.equals(photos, facility.photos) &&
-                Objects.equals(videos, facility.videos) &&
-                Objects.equals(address, facility.address);
+                Objects.equals(publishedDateTime, facility.publishedDateTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, numberOfRooms, totalArea, description, photos, videos, address);
+        return Objects.hash(id, numberOfRooms, totalArea, description, publishedDateTime);
     }
 }
