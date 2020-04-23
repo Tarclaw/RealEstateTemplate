@@ -12,11 +12,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @Component
 public class RealEstateBootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
-    private AddressRepository addressRepository;
     private ApartmentRepository apartmentRepository;
     private BasementRepository basementRepository;
     private GarageRepository garageRepository;
@@ -26,12 +29,11 @@ public class RealEstateBootstrap implements ApplicationListener<ContextRefreshed
     private RealEstateAgentRepository realEstateAgentRepository;
     private FacilityObjectRepository facilityObjectRepository;
 
-    public RealEstateBootstrap(AddressRepository addressRepository, ApartmentRepository apartmentRepository,
-                               BasementRepository basementRepository, GarageRepository garageRepository,
-                               HouseRepository houseRepository, StorageRepository storageRepository,
-                               ClientRepository clientRepository, RealEstateAgentRepository realEstateAgentRepository,
+    public RealEstateBootstrap(ApartmentRepository apartmentRepository, BasementRepository basementRepository,
+                               GarageRepository garageRepository, HouseRepository houseRepository,
+                               StorageRepository storageRepository, ClientRepository clientRepository,
+                               RealEstateAgentRepository realEstateAgentRepository,
                                FacilityObjectRepository facilityObjectRepository) {
-        this.addressRepository = addressRepository;
         this.apartmentRepository = apartmentRepository;
         this.basementRepository = basementRepository;
         this.garageRepository = garageRepository;
@@ -48,7 +50,6 @@ public class RealEstateBootstrap implements ApplicationListener<ContextRefreshed
     }
 
     private void initData() {
-        populateAddress();
         populateClients();
         populateRealEstateAgents();
         populateFacilityObjects();
@@ -58,39 +59,21 @@ public class RealEstateBootstrap implements ApplicationListener<ContextRefreshed
         populateGarage();
         populateStorage();
 
-        activateAddressRelationships();
         activateAgentsFacilityObjectsRelationships();
-        activateFacilityObjectsFacilitiesRelationship();
+        List<FacilityObject> facilityObjects = (List<FacilityObject>) facilityObjectRepository.findAll();
+
+        apartmentRepository.saveAll((Iterable<Apartment>) activateFacilityObjectsFacilitiesRelationship(
+                apartmentRepository.findAll(), facilityObjects, 0));
+        houseRepository.saveAll((Iterable<House>) activateFacilityObjectsFacilitiesRelationship(
+                houseRepository.findAll(), facilityObjects, 1));
+        basementRepository.saveAll((Iterable<Basement>) activateFacilityObjectsFacilitiesRelationship(
+                basementRepository.findAll(), facilityObjects, 2));
+        garageRepository.saveAll((Iterable<Garage>) activateFacilityObjectsFacilitiesRelationship(
+                garageRepository.findAll(), facilityObjects, 3));
+        storageRepository.saveAll((Iterable<Storage>) activateFacilityObjectsFacilitiesRelationship(
+                storageRepository.findAll(), facilityObjects, 4));
         activateClientsAgentsRelationship(0, 2);
-        activateClientsApartmentsRelationship(0, 1);
-        activateClientsBasementsRelationship(1, 2);
-        activateClientsGaragesRelationship(2, 3);
-        activateClientsHousesRelationship(0, 1);
-        activateClientsStoragesRelationship(1, 2);
-    }
-
-    private void populateAddress() {
-        Address commercialAgentAddress = new Address(888132, 355, "New York", "NY", "Queens");
-        Address nonCommercialAgentAddress = new Address(789654, 12, "New York", "NY", "Bronx");
-        Address richieAddress = new Address(369845, 514, "New York", "NY", "Brooklyn");
-        Address donaldAddress = new Address(159753, 645, "New York", "NY", "Madison Ave");
-        Address johnAddress = new Address(369456, 364, "New York", "NY", "Queens");
-        Address apartmentAddress = new Address(100305, 255, "New York", "NY", "Manhattan");
-        Address basementAddress = new Address(200645, 143, "New York", "NY", "Bronx");
-        Address garageAddress = new Address(99887, 657, "New York", "NY", "Brooklyn");
-        Address houseAddress = new Address(55322, 28, "New York", "NY", "Madison Ave");
-        Address storageAddress = new Address(888132, 665, "New York", "NY", "Queens");
-
-        addressRepository.save(commercialAgentAddress);
-        addressRepository.save(nonCommercialAgentAddress);
-        addressRepository.save(richieAddress);
-        addressRepository.save(donaldAddress);
-        addressRepository.save(johnAddress);
-        addressRepository.save(apartmentAddress);
-        addressRepository.save(basementAddress);
-        addressRepository.save(garageAddress);
-        addressRepository.save(houseAddress);
-        addressRepository.save(storageAddress);
+        activateClientsFacilitiesRelationship();
     }
 
     private void populateClients() {
@@ -113,7 +96,6 @@ public class RealEstateBootstrap implements ApplicationListener<ContextRefreshed
                 "123456",
                 new Contact("m.public@realestate.com", "m.public", "+1-014-777-3355"),
                 BigInteger.valueOf(5000L), LocalDate.now());
-
         RealEstateAgent nonCommercialAgent = new RealEstateAgent("Billy", "Butkiss", "billy_login", "qwerty",
                 new Contact("b.billy@realestate.com", "b.billy", "+1-014-515-2288"),
                 BigInteger.valueOf(4500L), LocalDate.now());
@@ -145,83 +127,43 @@ public class RealEstateBootstrap implements ApplicationListener<ContextRefreshed
     }
 
     private void populateApartment() {
+        Address apartmentAddress = new Address(100305, 255, "New York", "NY", "Manhattan");
         Apartment apartment = new Apartment(5, 150, "top rated xata",
-                LocalDateTime.now(), 788, 25);
+                LocalDateTime.now(), apartmentAddress,788, 25);
+        apartmentAddress.setFacility(apartment);
         apartmentRepository.save(apartment);
     }
 
     private void populateHouse() {
+        Address houseAddress = new Address(55322, 28, "New York", "NY", "Madison Ave");
         House house = new House(8, 300, "new home with repair for big family",
-                LocalDateTime.now(), 3, true, true);
+                LocalDateTime.now(), houseAddress, 3, true, true);
+        houseAddress.setFacility(house);
         houseRepository.save(house);
     }
 
     private void populateBasement() {
+        Address basementAddress = new Address(200645, 143, "New York", "NY", "Bronx");
         Basement basement = new Basement(3, 200, "barbershop, ready business model",
-                LocalDateTime.now(), true);
+                LocalDateTime.now(), basementAddress,true);
+        basementAddress.setFacility(basement);
         basementRepository.save(basement);
     }
 
     private void populateGarage() {
+        Address garageAddress = new Address(99887, 657, "New York", "NY", "Brooklyn");
         Garage garage = new Garage(3, 600, "vehicles repair facility",
-                LocalDateTime.now(),true, true);
+                LocalDateTime.now(), garageAddress,true, true);
+        garageAddress.setFacility(garage);
         garageRepository.save(garage);
     }
 
     private void populateStorage() {
+        Address storageAddress = new Address(888132, 665, "New York", "NY", "Queens");
         Storage storage = new Storage(3, 700, "huge storage for business needs",
-                LocalDateTime.now(), 600, true);
+                LocalDateTime.now(), storageAddress,600, true);
+        storageAddress.setFacility(storage);
         storageRepository.save(storage);
-    }
-
-    private void activateAddressRelationships() {
-        List<Address> addresses = (List<Address>) addressRepository.findAll();
-
-        List<Client> clients = (List<Client>) clientRepository.findAll();
-        List<RealEstateAgent> agents = (List<RealEstateAgent>) realEstateAgentRepository.findAll();
-
-        List<Apartment> apartments = (List<Apartment>) apartmentRepository.findAll();
-        List<House> houses = (List<House>) houseRepository.findAll();
-        List<Basement> basements = (List<Basement>) basementRepository.findAll();
-        List<Garage> garages = (List<Garage>) garageRepository.findAll();
-        List<Storage> storages = (List<Storage>) storageRepository.findAll();
-
-        int pointer = 0;
-        for (Client client : clients) {
-            client.setAddress(addresses.get(pointer));
-            pointer++;
-        }
-        clientRepository.saveAll(clients);
-        for (RealEstateAgent agent : agents) {
-            agent.setAddress(addresses.get(pointer));
-            pointer++;
-        }
-        realEstateAgentRepository.saveAll(agents);
-        for (Apartment apartment : apartments) {
-            apartment.setAddress(addresses.get(pointer));
-            pointer++;
-        }
-        apartmentRepository.saveAll(apartments);
-        for (House house : houses) {
-            house.setAddress(addresses.get(pointer));
-            pointer++;
-        }
-        houseRepository.saveAll(houses);
-        for (Basement basement : basements) {
-            basement.setAddress(addresses.get(pointer));
-            pointer++;
-        }
-        basementRepository.saveAll(basements);
-        for (Garage garage : garages) {
-            garage.setAddress(addresses.get(pointer));
-            pointer++;
-        }
-        garageRepository.saveAll(garages);
-        for (Storage storage : storages) {
-            storage.setAddress(addresses.get(pointer));
-            pointer++;
-        }
-        storageRepository.saveAll(storages);
     }
 
     private void activateAgentsFacilityObjectsRelationships() {
@@ -229,53 +171,28 @@ public class RealEstateBootstrap implements ApplicationListener<ContextRefreshed
         List<RealEstateAgent> agents = (List<RealEstateAgent>) realEstateAgentRepository.findAll();
 
         int pointer = 0;
-        for (FacilityObject facility : facilityObjects) {
+        for (FacilityObject facilityObject : facilityObjects) {
             if (pointer == agents.size()) {
                 pointer = 0;
             }
-            facility.setAgent(agents.get(pointer));
+            facilityObject.setAgent(agents.get(pointer));
             pointer++;
         }
 
         facilityObjectRepository.saveAll(facilityObjects);
+
     }
 
-    private void activateFacilityObjectsFacilitiesRelationship() {
-        List<FacilityObject> facilityObjects = (List<FacilityObject>) facilityObjectRepository.findAll();
 
-        List<Apartment> apartments = (List<Apartment>) apartmentRepository.findAll();
-        List<House> houses = (List<House>) houseRepository.findAll();
-        List<Basement> basements = (List<Basement>) basementRepository.findAll();
-        List<Garage> garages = (List<Garage>) garageRepository.findAll();
-        List<Storage> storages = (List<Storage>) storageRepository.findAll();
 
-        int pointer = 0;
+    private Iterable<? extends Facility> activateFacilityObjectsFacilitiesRelationship(Iterable<? extends Facility> facilities,
+                                                     List<FacilityObject> facilityObjects, int pointer) {
+        for(Facility facility : facilities) {
+            facility.setFacilityObject(facilityObjects.get(pointer));
+            pointer++;
+        }
 
-        for(Apartment apartment : apartments) {
-            apartment.setFacilityObject(facilityObjects.get(pointer));
-            pointer++;
-        }
-        apartmentRepository.saveAll(apartments);
-        for(House house : houses) {
-            house.setFacilityObject(facilityObjects.get(pointer));
-            pointer++;
-        }
-        houseRepository.saveAll(houses);
-        for(Basement basement : basements) {
-            basement.setFacilityObject(facilityObjects.get(pointer));
-            pointer++;
-        }
-        basementRepository.saveAll(basements);
-        for(Garage garage : garages) {
-            garage.setFacilityObject(facilityObjects.get(pointer));
-            pointer++;
-        }
-        garageRepository.saveAll(garages);
-        for(Storage storage : storages) {
-            storage.setFacilityObject(facilityObjects.get(pointer));
-            pointer++;
-        }
-        storageRepository.saveAll(storages);
+        return facilities;
     }
 
     private void activateClientsAgentsRelationship(int start, int finish) {
@@ -289,58 +206,21 @@ public class RealEstateBootstrap implements ApplicationListener<ContextRefreshed
         realEstateAgentRepository.saveAll(agents);
     }
 
-    private void activateClientsApartmentsRelationship(int start, int finish) {
+    private void activateClientsFacilitiesRelationship() {
         List<Client> clients = (List<Client>) clientRepository.findAll();
         List<Apartment> apartments = (List<Apartment>) apartmentRepository.findAll();
-
-        for (int index = 0; index < apartments.size(); index++) {
-            apartments.get(index).setClients(new HashSet<>(clients.subList(start, finish + index)));
-        }
-
-        apartmentRepository.saveAll(apartments);
-    }
-
-    private void activateClientsHousesRelationship(int start, int finish) {
-        List<Client> clients = (List<Client>) clientRepository.findAll();
         List<House> houses = (List<House>) houseRepository.findAll();
-
-        for (int index = 0; index < houses.size(); index++) {
-            houses.get(index).setClients(new HashSet<>(clients.subList(start, finish + index)));
-        }
-
-        houseRepository.saveAll(houses);
-    }
-
-    private void activateClientsBasementsRelationship(int start, int finish) {
-        List<Client> clients = (List<Client>) clientRepository.findAll();
         List<Basement> basements = (List<Basement>) basementRepository.findAll();
-
-        for (int index = 0; index < basements.size(); index++) {
-            basements.get(index).setClients(new HashSet<>(clients.subList(start, finish + index)));
-        }
-
-        basementRepository.saveAll(basements);
-    }
-
-    private void activateClientsGaragesRelationship(int start, int finish) {
-        List<Client> clients = (List<Client>) clientRepository.findAll();
         List<Garage> garages = (List<Garage>) garageRepository.findAll();
-
-        for (int index = 0; index < garages.size(); index++) {
-            garages.get(index).setClients(new HashSet<>(clients.subList(start, finish + index)));
-        }
-
-        garageRepository.saveAll(garages);
-    }
-
-    private void activateClientsStoragesRelationship(int start, int finish) {
-        List<Client> clients = (List<Client>) clientRepository.findAll();
         List<Storage> storages = (List<Storage>) storageRepository.findAll();
+        clientRepository. findAll();
 
-        for (int index = 0; index < storages.size(); index++) {
-            storages.get(index).setClients(new HashSet<>(clients.subList(start, finish + index)));
-        }
+        clients.get(0).addFacility(apartments.get(0));
+        clients.get(1).addFacility(houses.get(0));
+        clients.get(2).addFacility(basements.get(0));
+        clients.get(0).addFacility(garages.get(0));
+        clients.get(1).addFacility(storages.get(0));
 
-        storageRepository.saveAll(storages);
+        clientRepository.saveAll(clients);
     }
 }

@@ -24,10 +24,10 @@ public class FacilityObject implements Serializable {
     private BigInteger commissionAmount;
 
     @ManyToOne
-    @JoinColumn(name="fk_agent") // optional, allow to define fk name
+    @JoinColumn(name="fk_agent")
     private RealEstateAgent agent;
 
-    @OneToMany(mappedBy = "facilityObject")
+    @OneToMany(mappedBy = "facilityObject", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Facility> facilities;
 
     public FacilityObject() {}
@@ -109,15 +109,19 @@ public class FacilityObject implements Serializable {
         facility.setFacilityObject(this);
     }
 
+    public void removeFacility(Facility facility) {
+        this.facilities.remove(facility);
+        facility.setFacilityObject(null);
+    }
+
     @Override
     public String toString() {
         return "FacilityObject{" +
-                "status=" + status +
+                "id=" + id +
+                ", status=" + status +
                 ", monthRent=" + monthRent +
                 ", price=" + price +
                 ", commissionAmount=" + commissionAmount +
-                ", agent=" + agent +
-                ", facilities=" + facilities +
                 '}';
     }
 
@@ -130,13 +134,11 @@ public class FacilityObject implements Serializable {
                 status == that.status &&
                 Objects.equals(monthRent, that.monthRent) &&
                 Objects.equals(price, that.price) &&
-                Objects.equals(commissionAmount, that.commissionAmount) &&
-                Objects.equals(agent, that.agent) &&
-                Objects.equals(facilities, that.facilities);
+                Objects.equals(commissionAmount, that.commissionAmount);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, status, monthRent, price, commissionAmount, agent, facilities);
+        return Objects.hash(id, status, monthRent, price, commissionAmount);
     }
 }

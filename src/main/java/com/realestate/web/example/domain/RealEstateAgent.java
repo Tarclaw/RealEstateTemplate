@@ -31,13 +31,6 @@ public class RealEstateAgent extends Person {
         this.hiredDate = hiredDate;
     }
 
-    public RealEstateAgent(String firstName, String lastName, String login, String password,
-                           Contact contact, Address address, BigInteger salary, LocalDate hiredDate) {
-        super(firstName, lastName, login, password, contact, address);
-        this.salary = salary;
-        this.hiredDate = hiredDate;
-    }
-
     public BigInteger getSalary() {
         return salary;
     }
@@ -73,6 +66,11 @@ public class RealEstateAgent extends Person {
     public void addFacilityObject(FacilityObject facilityObject) {
         this.facilityObjects.add(facilityObject);
         facilityObject.setAgent(this);
+    }
+
+    public void removeFacilityObject(FacilityObject facilityObject) {
+        this.facilityObjects.remove(facilityObject);
+        facilityObject.setAgent(null);
     }
 
     public Set<Client> getClients() {

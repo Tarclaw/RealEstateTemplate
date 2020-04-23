@@ -1,12 +1,12 @@
 package com.realestate.web.example.domain;
 
+import org.hibernate.annotations.NaturalId;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
 
-@Entity
-@Table(name = "persons")
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@MappedSuperclass
 public class Person implements Serializable {
 
     @Id
@@ -15,15 +15,13 @@ public class Person implements Serializable {
     private Long id;
     private String firstName;
     private String lastName;
+
+    @NaturalId
     private String login;
     private String password;
 
     @Embedded
     private Contact contact;
-
-    @OneToOne
-    @JoinColumn(name = "fk_address")
-    private Address address;
 
     public Person() {}
 
@@ -33,15 +31,6 @@ public class Person implements Serializable {
         this.login = login;
         this.password = password;
         this.contact = contact;
-    }
-
-    public Person(String firstName, String lastName, String login, String password, Contact contact, Address address) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.login = login;
-        this.password = password;
-        this.contact = contact;
-        this.address = address;
     }
 
     public Long getId() {
@@ -92,14 +81,6 @@ public class Person implements Serializable {
         this.contact = contact;
     }
 
-    public Address getAddress() {
-        return address;
-    }
-
-    public void setAddress(Address address) {
-        this.address = address;
-    }
-
     @Override
     public String toString() {
         return "Person{" +
@@ -116,15 +97,11 @@ public class Person implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Person person = (Person) o;
-        return Objects.equals(id, person.id) &&
-                Objects.equals(firstName, person.firstName) &&
-                Objects.equals(lastName, person.lastName) &&
-                Objects.equals(login, person.login) &&
-                Objects.equals(password, person.password);
+        return Objects.equals(login, person.login);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName, login, password);
+        return Objects.hash(login);
     }
 }

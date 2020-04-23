@@ -2,7 +2,6 @@ package com.realestate.web.example.domain;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -29,18 +28,14 @@ public class Facility implements Serializable {
     @Lob
     private List<Byte[]> videos;
 
-    @OneToOne
-    @JoinColumn(name = "fk_address")
+    @OneToOne(mappedBy = "facility", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
     private Address address;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_facility_object")
     private FacilityObject facilityObject;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "clients_facilities",
-               joinColumns = @JoinColumn(name = "facility_id"),
-               inverseJoinColumns = @JoinColumn(name = "client_id"))
+    @ManyToMany(mappedBy = "facilities", fetch = FetchType.EAGER)
     private Set<Client> clients;
 
     public Facility() {}
@@ -178,16 +173,6 @@ public class Facility implements Serializable {
 
     public void setClients(Set<Client> clients) {
         this.clients = clients;
-    }
-
-    public void addClient(Client client) {
-        this.clients.add(client);
-        client.getFacilities().add(this);
-    }
-
-    public void removeClient(Client client) {
-        this.clients.remove(client);
-        client.getFacilities().remove(this);
     }
 
     @Override

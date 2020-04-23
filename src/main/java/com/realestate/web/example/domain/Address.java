@@ -9,8 +9,6 @@ import java.util.Objects;
 public class Address implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(updatable = false, nullable = false)
     private Long id;
     private Integer postcode;
     private Integer facilityNumber;
@@ -18,11 +16,9 @@ public class Address implements Serializable {
     private String district;
     private String street;
 
-    @OneToOne(mappedBy = "address")
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
     private Facility facility;
-
-    @OneToOne(mappedBy = "address")
-    private Person person;
 
     public Address() {
     }
@@ -90,14 +86,6 @@ public class Address implements Serializable {
 
     public void setFacility(Facility facility) {
         this.facility = facility;
-    }
-
-    public Person getPerson() {
-        return person;
-    }
-
-    public void setPerson(Person person) {
-        this.person = person;
     }
 
     @Override
