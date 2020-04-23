@@ -24,12 +24,13 @@ public class RealEstateBootstrap implements ApplicationListener<ContextRefreshed
     private ClientRepository clientRepository;
     private RealEstateAgentRepository realEstateAgentRepository;
     private FacilityObjectRepository facilityObjectRepository;
+    private FacilityRepository facilityRepository; //todo
 
     public RealEstateBootstrap(ApartmentRepository apartmentRepository, BasementRepository basementRepository,
                                GarageRepository garageRepository, HouseRepository houseRepository,
                                StorageRepository storageRepository, ClientRepository clientRepository,
                                RealEstateAgentRepository realEstateAgentRepository,
-                               FacilityObjectRepository facilityObjectRepository) {
+                               FacilityObjectRepository facilityObjectRepository, FacilityRepository facilityRepository) {
         this.apartmentRepository = apartmentRepository;
         this.basementRepository = basementRepository;
         this.garageRepository = garageRepository;
@@ -38,6 +39,7 @@ public class RealEstateBootstrap implements ApplicationListener<ContextRefreshed
         this.clientRepository = clientRepository;
         this.realEstateAgentRepository = realEstateAgentRepository;
         this.facilityObjectRepository = facilityObjectRepository;
+        this.facilityRepository = facilityRepository;
     }
 
     @Override
@@ -56,18 +58,7 @@ public class RealEstateBootstrap implements ApplicationListener<ContextRefreshed
         populateStorage();
 
         activateAgentsFacilityObjectsRelationships();
-        List<FacilityObject> facilityObjects = (List<FacilityObject>) facilityObjectRepository.findAll();
-
-        apartmentRepository.saveAll((Iterable<Apartment>) activateFacilityObjectsFacilitiesRelationship(
-                apartmentRepository.findAll(), facilityObjects, 0));
-        houseRepository.saveAll((Iterable<House>) activateFacilityObjectsFacilitiesRelationship(
-                houseRepository.findAll(), facilityObjects, 1));
-        basementRepository.saveAll((Iterable<Basement>) activateFacilityObjectsFacilitiesRelationship(
-                basementRepository.findAll(), facilityObjects, 2));
-        garageRepository.saveAll((Iterable<Garage>) activateFacilityObjectsFacilitiesRelationship(
-                garageRepository.findAll(), facilityObjects, 3));
-        storageRepository.saveAll((Iterable<Storage>) activateFacilityObjectsFacilitiesRelationship(
-                storageRepository.findAll(), facilityObjects, 4));
+        activateFacilityObjectsFacilitiesRelationship();
         activateClientsAgentsRelationship(0, 2);
         activateClientsFacilitiesRelationship();
     }
@@ -179,8 +170,6 @@ public class RealEstateBootstrap implements ApplicationListener<ContextRefreshed
 
     }
 
-
-
     private Iterable<? extends Facility> activateFacilityObjectsFacilitiesRelationship(Iterable<? extends Facility> facilities,
                                                      List<FacilityObject> facilityObjects, int pointer) {
         for(Facility facility : facilities) {
@@ -189,6 +178,22 @@ public class RealEstateBootstrap implements ApplicationListener<ContextRefreshed
         }
 
         return facilities;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void activateFacilityObjectsFacilitiesRelationship() {
+        List<FacilityObject> facilityObjects = (List<FacilityObject>) facilityObjectRepository.findAll();
+
+        apartmentRepository.saveAll((Iterable<Apartment>) activateFacilityObjectsFacilitiesRelationship(
+                apartmentRepository.findAll(), facilityObjects, 0));
+        houseRepository.saveAll((Iterable<House>) activateFacilityObjectsFacilitiesRelationship(
+                houseRepository.findAll(), facilityObjects, 1));
+        basementRepository.saveAll((Iterable<Basement>) activateFacilityObjectsFacilitiesRelationship(
+                basementRepository.findAll(), facilityObjects, 2));
+        garageRepository.saveAll((Iterable<Garage>) activateFacilityObjectsFacilitiesRelationship(
+                garageRepository.findAll(), facilityObjects, 3));
+        storageRepository.saveAll((Iterable<Storage>) activateFacilityObjectsFacilitiesRelationship(
+                storageRepository.findAll(), facilityObjects, 4));
     }
 
     private void activateClientsAgentsRelationship(int start, int finish) {
