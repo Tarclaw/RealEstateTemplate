@@ -15,7 +15,10 @@ public class Client extends Person {
     @ManyToMany(mappedBy = "clients")
     private Set<RealEstateAgent> realEstateAgents;
 
-    @ManyToMany(mappedBy = "clients")
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @JoinTable(name = "clients_facilities",
+            joinColumns = @JoinColumn(name = "facility_id"),
+            inverseJoinColumns = @JoinColumn(name = "client_id"))
     private Set<Facility> facilities;
 
     public Client() {}
@@ -23,15 +26,6 @@ public class Client extends Person {
     public Client(String firstName, String lastName, String login, String password, Contact contact,
                   boolean isSeller, boolean isBuyer, boolean isRenter, boolean isLeaser) {
         super(firstName, lastName, login, password, contact);
-        this.isSeller = isSeller;
-        this.isBuyer = isBuyer;
-        this.isRenter = isRenter;
-        this.isLeaser = isLeaser;
-    }
-
-    public Client(String firstName, String lastName, String login, String password, Contact contact,
-                  Address address, boolean isSeller, boolean isBuyer, boolean isRenter, boolean isLeaser) {
-        super(firstName, lastName, login, password, contact, address);
         this.isSeller = isSeller;
         this.isBuyer = isBuyer;
         this.isRenter = isRenter;
@@ -84,6 +78,16 @@ public class Client extends Person {
 
     public void setFacilities(Set<Facility> facilities) {
         this.facilities = facilities;
+    }
+
+    public void addFacility(Facility facility) {
+        this.facilities.add(facility);
+        facility.getClients().remove(this);
+    }
+
+    public void removeFacility(Facility facility) {
+        this.facilities.remove(facility);
+        facility.getClients().remove(this);
     }
 
     @Override
