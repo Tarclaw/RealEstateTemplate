@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Real Estate Agency</title>
+</head>
+<body>
+
+<h1>Storages List</h1>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Description</th>
+        <th>Number of Rooms</th>
+        <th>Published</th>
+        <th>Area</th>
+        <th>Commercial Capacity</th>
+        <th>Cargo Equipment</th>
+    </tr>
+    <tr th:each="storage : ${storages}">
+        <td th:text="${storage.getId()}">ID</td>
+        <td th:text="${storage.getDescription()}">Kyiv</td>
+        <td th:text="${storage.getNumberOfRooms()}">Kyivska</td>
+        <td th:text="${storage.getPublishedDateTime()}">Shuhevuch</td>
+        <td th:text="${storage.getTotalArea()}">789000</td>
+        <td th:text="${storage.getCommercialCapacity()}">500000</td>
+        <td th:text="${storage.isHasCargoEquipment()}">true</td>
+    </tr>
+</table>
+
+</body>
+</html>

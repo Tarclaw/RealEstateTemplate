@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Real Estate Agency</title>
+</head>
+<body>
+
+<h1>Agents List</h1>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>Skype</th>
+        <th>Login</th>
+        <th>Password</th>
+        <th>Hired Date</th>
+        <th>Quit Date</th>
+        <th>Salary</th>
+    </tr>
+    <tr th:each="agent : ${agents}">
+        <td th:text="${agent.getId()}">ID</td>
+        <td th:text="${agent.getFirstName()}">Joe</td>
+        <td th:text="${agent.getLastName()}">Doe</td>
+        <td th:text="${agent.getContact().getMobileNumber()}">2-06-77</td>
+        <td th:text="${agent.getContact().getEmail()}">email@host.com</td>
+        <td th:text="${agent.getContact().getSkype()}">skype</td>
+        <td th:text="${agent.getLogin()}">doe</td>
+        <td th:text="${agent.getPassword()}">123</td>
+        <td th:text="${agent.getHiredDate()}">01.01.2020</td>
+        <td th:text="${agent.getQuitDate()}">??.??.????</td>
+        <td th:text="${agent.getSalary()}">1000</td>
+    </tr>
+</table>
+
+</body>
+</html>

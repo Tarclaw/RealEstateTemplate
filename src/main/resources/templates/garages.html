@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Real Estate Agency</title>
+</head>
+<body>
+
+<h1>Garages List</h1>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Description</th>
+        <th>Number of Rooms</th>
+        <th>Published</th>
+        <th>Area</th>
+        <th>Equipment</th>
+        <th>Pit</th>
+    </tr>
+    <tr th:each="garage : ${garages}">
+        <td th:text="${garage.getId()}">ID</td>
+        <td th:text="${garage.getDescription()}">Kyiv</td>
+        <td th:text="${garage.getNumberOfRooms()}">Kyivska</td>
+        <td th:text="${garage.getPublishedDateTime()}">Shuhevuch</td>
+        <td th:text="${garage.getTotalArea()}">789000</td>
+        <td th:text="${garage.isHasEquipment()}">true</td>
+        <td th:text="${garage.isHasPit()}">true</td>
+    </tr>
+</table>
+
+</body>
+</html>

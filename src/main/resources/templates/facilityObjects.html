@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Real Estate Agency</title>
+</head>
+<body>
+
+<h1>Facility Objects List</h1>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Price</th>
+        <th>Commission Amount</th>
+        <th>Month Rent</th>
+        <th>Status</th>
+    </tr>
+    <tr th:each="facilityObject : ${facilityObjects}">
+        <td th:text="${facilityObject.getId()}">ID</td>
+        <td th:text="${facilityObject.getPrice()}">UNKNOWN</td>
+        <td th:text="${facilityObject.getCommissionAmount()}">UNKNOWN</td>
+        <td th:text="${facilityObject.getMonthRent()}">UNKNOWN</td>
+        <td th:text="${facilityObject.getStatus()}">UNKNOWN</td>
+    </tr>
+</table>
+
+</body>
+</html>
